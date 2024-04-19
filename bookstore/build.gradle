@@ -1,0 +1,95 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+war{
+    archiveFileName="helloworld3.war"
+}
+
+ext.tomcat_home='E:\\STUD\\8_SEM\\Persistence\\apache-tomcat-9.0.73-windows-x64\\apache-tomcat-9.0.73'
+ext.tomcat_bin=tomcat_home + '\\bin'
+ext.tomcat_start=tomcat_bin + '\\startup.bat'
+ext.tomcat_stop=tomcat_bin + '\\shutdown.bat'
+ext.tomcat_webapps = tomcat_home + '\\webapps'
+
+
+task tom{
+
+    if (project.hasProperty('start')) {
+        startTom()
+    } else if (project.hasProperty('stop')) {
+        stopTom()
+    } else if (project.hasProperty('deployNstart')) {
+        stopTom()
+        webappsCopy()
+        startTom()
+    } else {
+
+    }
+}
+
+def stopTom() {
+    executeCmd(tomcat_stop)
+}
+
+def startTom() {
+    executeCmd(tomcat_start)
+}
+
+
+def executeCmd(command) {
+    def proc = command.execute()
+    proc.waitFor()
+}
+
+def webappsCopy() {
+
+    copy {
+        from 'build/libs'
+        into tomcat_webapps
+        include "*.war"
+    }
+}
+
+dependencies {
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation group: 'org.springframework', name: 'spring-core', version: '5.3.20'
+    implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.3.20'
+    implementation group: 'org.springframework', name: 'spring-orm', version: '5.3.20'
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+
+    implementation group: 'javax.servlet', name: 'jstl', version: '1.2'
+    implementation group: 'org.hibernate', name: 'hibernate-gradle-plugin', version:'5.4.2.Final'
+    implementation group: 'org.hibernate', name: 'hibernate-c3p0', version: '5.4.2.Final'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
+
+    implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.1.0.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.1.0.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.1.0.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-taglibs', version: '5.1.0.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.1.0.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.1.0.RELEASE'
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:<version>'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:<version>'
+    implementation 'com.github.alexdlaird:java-ngrok:2.1.0'
+}
+
+test {
+    useJUnitPlatform()
+}
